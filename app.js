@@ -20,8 +20,10 @@ async function main() {
 app.get("/", (req, res) => {
   res.send("Hi, I am root");
 });
+
+
 app.get("/about",(req,res)=>{
-  res.render("about");
+  res.render("about",{title:"About Us", name:"Wanderlust" , description:"We are a travel company dedicated to providing the best travel experiences."});
 });
 
 
