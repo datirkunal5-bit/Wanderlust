@@ -55,6 +55,10 @@ app.get("/test", async (req, res) => {
         res.status(500).send("Error saving listing");
     }
 });
+app.get("/listings", async (req, res) => {
+    const allListings = await Listing.find({});
+    res.render("listings/index.ejs", { allListings });
+});
 
 // 404 Handler
 app.use((req, res) => {

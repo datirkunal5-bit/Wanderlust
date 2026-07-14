@@ -1,0 +1,6 @@
+<h1>All Listings</h1>
+<ul>
+  <% allListings.forEach(listing => { %>
+    <li><%= listing.title %> — ₹<%= listing.price %></li>
+  <% }) %>
+</ul>
