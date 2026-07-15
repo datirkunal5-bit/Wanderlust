@@ -55,10 +55,12 @@ app.get("/test", async (req, res) => {
         res.status(500).send("Error saving listing");
     }
 });
+
 app.get("/listings", async (req, res) => {
     const allListings = await Listing.find({});
     res.render("listings/index.ejs", { allListings });
 });
+
 
 // 404 Handler
 app.use((req, res) => {
@@ -74,4 +76,15 @@ app.use((err, req, res, next) => {
 // Start Server
 app.listen(8080, () => {
     console.log("Server is listening on port 8080");
+});
+// NEW - show form to create a listing
+app.get("/listings/new", (req, res) => {
+    res.render("listings/new.ejs");
+});
+
+// CREATE - save the submitted listing
+app.post("/listings", async (req, res) => {
+    const newListing = new Listing(req.body.listing);
+    await newListing.save();
+    res.redirect("/listings");
 });

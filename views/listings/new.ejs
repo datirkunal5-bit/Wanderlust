@@ -1,0 +1,19 @@
+<h1>Create a New Listing</h1>
+<form method="POST" action="/listings">
+  <label>Title</label>
+  <input type="text" name="listing[title]" required><br>
+
+  <label>Description</label>
+  <input type="text" name="listing[description]"><br>
+
+  <label>Price</label>
+  <input type="number" name="listing[price]"><br>
+
+  <label>Location</label>
+  <input type="text" name="listing[location]"><br>
+
+  <label>Country</label>
+  <input type="text" name="listing[country]"><br>
+
+  <button type="submit">Create Listing</button>
+</form>
