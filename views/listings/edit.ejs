@@ -1,0 +1,19 @@
+<h1>Edit Listing</h1>
+<form method="POST" action="/listings/<%= listing._id %>?_method=PUT">
+  <label>Title</label>
+  <input type="text" name="listing[title]" value="<%= listing.title %>"><br>
+
+  <label>Description</label>
+  <input type="text" name="listing[description]" value="<%= listing.description %>"><br>
+
+  <label>Price</label>
+  <input type="number" name="listing[price]" value="<%= listing.price %>"><br>
+
+  <label>Location</label>
+  <input type="text" name="listing[location]" value="<%= listing.location %>"><br>
+
+  <label>Country</label>
+  <input type="text" name="listing[country]" value="<%= listing.country %>"><br>
+
+  <button type="submit">Update Listing</button>
+</form>

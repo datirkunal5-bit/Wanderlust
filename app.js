@@ -2,10 +2,12 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const Listing = require("./models/listing");
+const methodOverride = require("method-override");
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 
 // View Engine
 app.set("view engine", "ejs");
@@ -65,6 +67,20 @@ app.get("/listings/:id", async (req, res) => {
     const { id } = req.params;
     const listing = await Listing.findById(id);
     res.render("listings/show.ejs", { listing });
+});
+
+// EDIT - show form to edit a listing
+app.get("/listings/:id/edit", async (req, res) => {
+    const { id } = req.params;
+    const listing = await Listing.findById(id);
+    res.render("listings/edit.ejs", { listing });
+});
+
+// UPDATE - save the edited listing
+app.put("/listings/:id", async (req, res) => {
+    const { id } = req.params;
+    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    res.redirect(`/listings/${id}`);
 });
 
 
