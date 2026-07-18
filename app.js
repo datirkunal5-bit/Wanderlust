@@ -47,6 +47,19 @@ app.get("/listings", async (req, res) => {
     const allListings = await Listing.find({});
     res.render("listings/index.ejs", { allListings });
 });
+
+// NEW - show form to create a listing
+app.get("/listings/new", (req, res) => {
+    res.render("listings/new.ejs");
+});
+
+// CREATE - save the submitted listing
+app.post("/listings", async (req, res) => {
+    const newListing = new Listing(req.body.listing);
+    await newListing.save();
+    res.redirect("/listings");
+});
+
 // SHOW - view a single listing
 app.get("/listings/:id", async (req, res) => {
     const { id } = req.params;
@@ -68,6 +81,12 @@ app.put("/listings/:id", async (req, res) => {
     res.redirect(`/listings/${id}`);
 });
 
+// DELETE - remove a listing
+app.delete("/listings/:id", async (req, res) => {
+    const { id } = req.params;
+    await Listing.findByIdAndDelete(id);
+    res.redirect("/listings");
+});
 
 // 404 Handler
 app.use((req, res) => {
