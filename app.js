@@ -29,7 +29,7 @@ async function main() {
 
 // Routes
 app.get("/", (req, res) => {
-    res.send("Hi, I am root");
+     res.render("home.ejs");
 });
 
 app.get("/about", (req, res) => {
@@ -40,23 +40,8 @@ app.get("/about", (req, res) => {
     });
 });
 
-app.get("/test", async (req, res) => {
-    try {
-        let sample = new Listing({
-            title: "Test Listing",
-            description: "This is a test listing",
-            price: 1200,
-            location: "New York",
-            country: "USA",
-        });
-        await sample.save();
-        res.send(sample);
-        console.log("Sample was saved successfully");
-    } catch (err) {
-        console.error("Error saving listing:", err);
-        res.status(500).send("Error saving listing");
-    }
-});
+
+
 
 app.get("/listings", async (req, res) => {
     const allListings = await Listing.find({});
