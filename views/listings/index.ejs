@@ -1,18 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>All Listings</title>
-</head>
-<body>
-  <a href="/">← Home</a>
-  <h1>All Listings</h1>
-  <a href="/listings/new">+ Create New Listing</a>
-  <ul>
-    <% allListings.forEach(listing => { %>
-      <li>
-        <a href="/listings/<%= listing._id %>"><%= listing.title %></a> — ₹<%= listing.price %>
-      </li>
-    <% }) %>
-  </ul>
-</body>
-</html>
+<h1>All Listings</h1>
+<a href="/listings/new">+ Create New Listing</a>
+<ul>
+  <% allListings.forEach(listing => { %>
+    <li>
+      <a href="/listings/<%= listing._id %>"><%= listing.title %></a> — ₹<%= listing.price %>
+    </li>
+  <% }) %>
+</ul>
