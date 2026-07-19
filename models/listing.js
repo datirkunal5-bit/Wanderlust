@@ -17,5 +17,18 @@ const listingSchema = new mongoose.Schema({
 });
 
 const Listing = mongoose.model("Listing", listingSchema);
-
+const listingSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  description: String,
+  image: String,
+  price: {
+    type: Number,
+    min: 0,
+  },
+  location: String,
+  country: String,
+});
 module.exports = Listing;

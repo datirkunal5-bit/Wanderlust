@@ -43,11 +43,15 @@ app.get("/about", (req, res) => {
 
 
 
-app.get("/listings", async (req, res) => {
-    const allListings = await Listing.find({});
-    res.render("listings/index.ejs", { allListings });
+app.post("/listings", async (req, res, next) => {
+    try {
+        const newListing = new Listing(req.body.listing);
+        await newListing.save();
+        res.redirect("/listings");
+    } catch (err) {
+        next(err);
+    }
 });
-
 // NEW - show form to create a listing
 app.get("/listings/new", (req, res) => {
     res.render("listings/new.ejs");
@@ -61,10 +65,17 @@ app.post("/listings", async (req, res) => {
 });
 
 // SHOW - view a single listing
-app.get("/listings/:id", async (req, res) => {
-    const { id } = req.params;
-    const listing = await Listing.findById(id);
-    res.render("listings/show.ejs", { listing });
+app.get("/listings/:id", async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const listing = await Listing.findById(id);
+        if (!listing) {
+            return res.status(404).send("Listing not found");
+        }
+        res.render("listings/show.ejs", { listing });
+    } catch (err) {
+        next(err); // passes error to your global error handler
+    }
 });
 
 // EDIT - show form to edit a listing
