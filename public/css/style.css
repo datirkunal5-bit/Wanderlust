@@ -63,3 +63,21 @@ h1 {
   color: #666;
   font-size: 0.85rem;
 }
+.error-msg {
+  display: none;
+  color: #d33;
+  font-size: 0.85rem;
+  margin-top: -0.4rem;
+}
+
+.was-validated input:invalid {
+  border-color: #d33;
+}
+
+.was-validated input:invalid ~ .error-msg {
+  display: block;
+}
+
+.was-validated input:valid {
+  border-color: #2a2;
+}
