@@ -1,9 +1,14 @@
 <h1>All Listings</h1>
-<a href="/listings/new">+ Create New Listing</a>
-<ul>
+<a href="/listings/new" class="btn-new">+ Create New Listing</a>
+
+<div class="listing-grid">
   <% allListings.forEach(listing => { %>
-    <li>
-      <a href="/listings/<%= listing._id %>"><%= listing.title %></a> — ₹<%= listing.price %>
-    </li>
+    <div class="listing-card">
+      <a href="/listings/<%= listing._id %>">
+        <h3><%= listing.title %></h3>
+        <p class="location"><%= listing.location %>, <%= listing.country %></p>
+        <p class="price">₹<%= listing.price %> <span>/ night</span></p>
+      </a>
+    </div>
   <% }) %>
-</ul>
+</div>

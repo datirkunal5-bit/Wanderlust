@@ -1,84 +1,65 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+h1 {
+  margin-bottom: 1rem;
 }
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
-  color: #222;
-}
-
-nav {
+.btn-new {
+  display: inline-block;
   background-color: #fe424d;
-  padding: 1rem 2rem;
-  display: flex;
-  gap: 1.5rem;
-}
-
-nav a {
   color: white;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-nav a:hover {
-  text-decoration: underline;
-}
-
-main {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-}
-
-ul {
-  list-style: none;
-}
-
-li {
-  background: white;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-li a {
-  text-decoration: none;
-  color: #222;
-  font-weight: 600;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 400px;
-}
-
-input, button {
-  padding: 0.6rem;
-  font-size: 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
 }
 
-button {
-  background-color: #fe424d;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-button:hover {
+.btn-new:hover {
   background-color: #e2323d;
 }
 
-footer {
-  text-align: center;
-  padding: 1.5rem;
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.listing-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.listing-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.listing-card a {
+  display: block;
+  padding: 1rem;
+  text-decoration: none;
+  color: #222;
+}
+
+.listing-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.4rem;
+}
+
+.listing-card .location {
   color: #666;
   font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.listing-card .price {
+  font-weight: 700;
+}
+
+.listing-card .price span {
+  font-weight: 400;
+  color: #666;
+  font-size: 0.85rem;
 }
