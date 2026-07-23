@@ -81,3 +81,22 @@ h1 {
 .was-validated input:valid {
   border-color: #2a2;
 }
+.flash {
+  max-width: 900px;
+  margin: 1rem auto 0;
+  padding: 0.9rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.flash-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.flash-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}

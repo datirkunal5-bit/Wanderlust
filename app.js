@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const Listing = require("./models/listing");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const session = require("express-session");
+const flash = require("connect-flash");
 
 // Middleware
 app.use(express.json());
@@ -11,6 +13,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 const path = require("path");
 app.use(express.static(path.join(__dirname, "public")));
+const sessionOptions = {
+  secret: "mysupersecretcode",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  },
+};
+
+app.use(session(sessionOptions));
+app.use(flash());
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
 
 // View Engine
 app.set("view engine", "ejs");
@@ -52,6 +72,7 @@ app.post("/listings", async (req, res, next) => {
     try {
         const newListing = new Listing(req.body.listing);
         await newListing.save();
+        req.flash("success", "New Listing Created!");
         res.redirect("/listings");
     } catch (err) {
         next(err);
@@ -91,19 +112,28 @@ app.get("/listings/:id/edit", async (req, res) => {
 });
 
 // UPDATE - save the edited listing
-app.put("/listings/:id", async (req, res) => {
-    const { id } = req.params;
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-    res.redirect(`/listings/${id}`);
+app.delete("/listings/:id", async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await Listing.findByIdAndDelete(id);
+        req.flash("success", "Listing Deleted!");
+        res.redirect("/listings");
+    } catch (err) {
+        next(err);
+    }
 });
 
 // DELETE - remove a listing
-app.delete("/listings/:id", async (req, res) => {
-    const { id } = req.params;
-    await Listing.findByIdAndDelete(id);
-    res.redirect("/listings");
+app.delete("/listings/:id", async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await Listing.findByIdAndDelete(id);
+        req.flash("success", "Listing Deleted!");
+        res.redirect("/listings");
+    } catch (err) {
+        next(err);
+    }
 });
-
 // 404 Handler
 app.use((req, res) => {
     res.status(404).send("Page not found");
