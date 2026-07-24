@@ -134,16 +134,6 @@ app.delete("/listings/:id", async (req, res, next) => {
         next(err);
     }
 });
-// 404 Handler
-app.use((req, res) => {
-    res.status(404).send("Page not found");
-});
-
-// Global Error Handler
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send("Something went wrong!");
-});
 
 // Start Server
 app.listen(8080, () => {
@@ -159,4 +149,14 @@ app.post("/listings", async (req, res) => {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect("/listings");
+});
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).send("Page not found");
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send("Something went wrong!");
 });
