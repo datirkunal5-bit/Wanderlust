@@ -6,9 +6,12 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
 const flash = require("connect-flash");
-const Listing = require("./models/listing");
 
-// Middleware
+const Listing = require("./models/listing");
+const ExpressError = require("./utils/ExpressError.js");
+const wrapAsync = require("./utils/wrapAsync.js");
+
+// ---------- Middleware ----------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
@@ -19,7 +22,7 @@ const sessionOptions = {
   resave: false,
   saveUninitialized: true,
   cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
   },
@@ -27,27 +30,24 @@ const sessionOptions = {
 
 app.use(session(sessionOptions));
 app.use(flash());
+
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
 });
 
-// View Engine
+// ---------- View Engine ----------
 app.set("view engine", "ejs");
 app.set("layout", "layouts/boilerplate");
 app.engine("ejs", ejsMate);
 
-// MongoDB Connection
+// ---------- MongoDB Connection ----------
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
 main()
-  .then(() => {
-    console.log("Connected to DB");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+  .then(() => console.log("Connected to DB"))
+  .catch((err) => console.log(err));
 
 async function main() {
   await mongoose.connect(MONGO_URL);
@@ -66,95 +66,87 @@ app.get("/about", (req, res) => {
   });
 });
 
-// ---------- Listing Routes (REST order matters) ----------
+// ---------- Listing Routes ----------
 
-// INDEX - show all listings
-app.get("/listings", async (req, res, next) => {
-  try {
-    const allListings = await Listing.find({});
-    res.render("listings/index.ejs", { allListings });
-  } catch (err) {
-    next(err);
-  }
-});
+// INDEX
+app.get("/listings", wrapAsync(async (req, res) => {
+  const allListings = await Listing.find({});
+  res.render("listings/index.ejs", { allListings });
+}));
 
-// NEW - show form to create a listing (must be before /:id)
+// NEW (must come before /:id)
 app.get("/listings/new", (req, res) => {
   res.render("listings/new.ejs");
 });
 
-// CREATE - save the submitted listing
-app.post("/listings", async (req, res, next) => {
+// CREATE
+app.post("/listings", wrapAsync(async (req, res) => {
   try {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     req.flash("success", "New Listing Created!");
     res.redirect("/listings");
   } catch (err) {
-    next(err);
-  }
-});
-
-// SHOW - view a single listing
-app.get("/listings/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const listing = await Listing.findById(id);
-    if (!listing) {
-      return res.status(404).send("Listing not found");
+    if (err.name === "ValidationError") {
+      req.flash("error", err.message);
+      return res.redirect("/listings/new");
     }
-    res.render("listings/show.ejs", { listing });
-  } catch (err) {
-    next(err);
+    throw err;
   }
-});
+}));
 
-// EDIT - show form to edit a listing
-app.get("/listings/:id/edit", async (req, res, next) => {
+// SHOW
+app.get("/listings/:id", wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+  if (!listing) {
+    throw new ExpressError(404, "Listing not found");
+  }
+  res.render("listings/show.ejs", { listing });
+}));
+
+// EDIT
+app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+  if (!listing) {
+    throw new ExpressError(404, "Listing not found");
+  }
+  res.render("listings/edit.ejs", { listing });
+}));
+
+// UPDATE
+app.put("/listings/:id", wrapAsync(async (req, res) => {
   try {
     const { id } = req.params;
-    const listing = await Listing.findById(id);
-    if (!listing) {
-      return res.status(404).send("Listing not found");
-    }
-    res.render("listings/edit.ejs", { listing });
-  } catch (err) {
-    next(err);
-  }
-});
-
-// UPDATE - save the edited listing
-app.put("/listings/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { runValidators: true });
     req.flash("success", "Listing Updated!");
     res.redirect(`/listings/${id}`);
   } catch (err) {
-    next(err);
+    if (err.name === "ValidationError") {
+      req.flash("error", err.message);
+      return res.redirect(`/listings/${req.params.id}/edit`);
+    }
+    throw err;
   }
-});
+}));
 
-// DELETE - remove a listing
-app.delete("/listings/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    await Listing.findByIdAndDelete(id);
-    req.flash("success", "Listing Deleted!");
-    res.redirect("/listings");
-  } catch (err) {
-    next(err);
-  }
-});
+// DELETE
+app.delete("/listings/:id", wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  await Listing.findByIdAndDelete(id);
+  req.flash("success", "Listing Deleted!");
+  res.redirect("/listings");
+}));
 
-// ---------- 404 + Error Handlers (always last) ----------
-app.use((req, res) => {
-  res.status(404).send("Page not found");
+// ---------- 404 + Error Handlers (always last, in this order) ----------
+app.use((req, res, next) => {
+  next(new ExpressError(404, "Page not found"));
 });
 
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something went wrong!");
+  const { statusCode = 500, message = "Something went wrong!" } = err;
+  res.status(statusCode).render("error.ejs", { message });
 });
 
 // ---------- Start Server ----------
