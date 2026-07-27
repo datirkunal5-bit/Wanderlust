@@ -10,6 +10,17 @@ const flash = require("connect-flash");
 const Listing = require("./models/listing");
 const ExpressError = require("./utils/ExpressError.js");
 const wrapAsync = require("./utils/wrapAsync.js");
+const { listingSchema } = require("./schema.js");
+
+const validateListing = (req, res, next) => {
+  const { error } = listingSchema.validate(req.body);
+  if (error) {
+    const errMsg = error.details.map((el) => el.message).join(", ");
+    throw new ExpressError(400, errMsg);
+  } else {
+    next();
+  }
+};
 
 // ---------- Middleware ----------
 app.use(express.json());
@@ -80,7 +91,8 @@ app.get("/listings/new", (req, res) => {
 });
 
 // CREATE
-app.post("/listings", wrapAsync(async (req, res) => {
+// CREATE
+app.post("/listings", validateListing, wrapAsync(async (req, res) => {
   try {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
@@ -94,7 +106,6 @@ app.post("/listings", wrapAsync(async (req, res) => {
     throw err;
   }
 }));
-
 // SHOW
 app.get("/listings/:id", wrapAsync(async (req, res) => {
   const { id } = req.params;
@@ -116,7 +127,8 @@ app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
 }));
 
 // UPDATE
-app.put("/listings/:id", wrapAsync(async (req, res) => {
+// UPDATE
+app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
   try {
     const { id } = req.params;
     await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { runValidators: true });
