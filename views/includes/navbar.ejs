@@ -3,4 +3,11 @@
   <a href="/listings">Explore</a>
   <a href="/listings/new">Add Listing</a>
   <a href="/about">About</a>
+
+  <% if (currentUser) { %>
+    <a href="/logout">Logout</a>
+  <% } else { %>
+    <a href="/login">Login</a>
+    <a href="/signup">Sign Up</a>
+  <% } %>
 </nav>

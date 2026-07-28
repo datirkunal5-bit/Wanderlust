@@ -6,6 +6,9 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user.js");
 
 const Listing = require("./models/listing");
 const ExpressError = require("./utils/ExpressError.js");
@@ -41,10 +44,17 @@ const sessionOptions = {
 
 app.use(session(sessionOptions));
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
+  res.locals.currentUser = req.user;
   next();
 });
 
@@ -164,4 +174,49 @@ app.use((err, req, res, next) => {
 // ---------- Start Server ----------
 app.listen(8080, () => {
   console.log("Server is listening on port 8080");
+});
+// Signup form
+app.get("/signup", (req, res) => {
+  res.render("users/signup.ejs");
+});
+
+// Register new user
+app.post("/signup", wrapAsync(async (req, res, next) => {
+  try {
+    const { username, email, password } = req.body;
+    const newUser = new User({ username, email });
+    const registeredUser = await User.register(newUser, password);
+    req.login(registeredUser, (err) => {
+      if (err) return next(err);
+      req.flash("success", "Welcome to Wanderlust!");
+      res.redirect("/listings");
+    });
+  } catch (err) {
+    req.flash("error", err.message);
+    res.redirect("/signup");
+  }
+}));
+// Login form
+app.get("/login", (req, res) => {
+  res.render("users/login.ejs");
+});
+
+// Authenticate user
+app.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/login",
+    failureFlash: true,
+  }),
+  (req, res) => {
+    req.flash("success", "Welcome back!");
+    res.redirect("/listings");
+  }
+);
+app.get("/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    req.flash("success", "Logged out successfully!");
+    res.redirect("/listings");
+  });
 });
