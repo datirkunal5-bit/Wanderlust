@@ -8,8 +8,8 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const User = require("./models/user.js");
 
+const User = require("./models/user.js");
 const Listing = require("./models/listing");
 const ExpressError = require("./utils/ExpressError.js");
 const wrapAsync = require("./utils/wrapAsync.js");
@@ -20,9 +20,8 @@ const validateListing = (req, res, next) => {
   if (error) {
     const errMsg = error.details.map((el) => el.message).join(", ");
     throw new ExpressError(400, errMsg);
-  } else {
-    next();
   }
+  next();
 };
 
 // ---------- Middleware ----------
@@ -44,13 +43,14 @@ const sessionOptions = {
 
 app.use(session(sessionOptions));
 app.use(flash());
+
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
-
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+// Single source of truth for locals - runs once per request
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
@@ -60,7 +60,6 @@ app.use((req, res, next) => {
 
 // ---------- View Engine ----------
 app.set("view engine", "ejs");
-app.set("layout", "layouts/boilerplate");
 app.engine("ejs", ejsMate);
 
 // ---------- MongoDB Connection ----------
@@ -87,100 +86,11 @@ app.get("/about", (req, res) => {
   });
 });
 
-// ---------- Listing Routes ----------
-
-// INDEX
-app.get("/listings", wrapAsync(async (req, res) => {
-  const allListings = await Listing.find({});
-  res.render("listings/index.ejs", { allListings });
-}));
-
-// NEW (must come before /:id)
-app.get("/listings/new", (req, res) => {
-  res.render("listings/new.ejs");
-});
-
-// CREATE
-// CREATE
-app.post("/listings", validateListing, wrapAsync(async (req, res) => {
-  try {
-    const newListing = new Listing(req.body.listing);
-    await newListing.save();
-    req.flash("success", "New Listing Created!");
-    res.redirect("/listings");
-  } catch (err) {
-    if (err.name === "ValidationError") {
-      req.flash("error", err.message);
-      return res.redirect("/listings/new");
-    }
-    throw err;
-  }
-}));
-// SHOW
-app.get("/listings/:id", wrapAsync(async (req, res) => {
-  const { id } = req.params;
-  const listing = await Listing.findById(id);
-  if (!listing) {
-    throw new ExpressError(404, "Listing not found");
-  }
-  res.render("listings/show.ejs", { listing });
-}));
-
-// EDIT
-app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
-  const { id } = req.params;
-  const listing = await Listing.findById(id);
-  if (!listing) {
-    throw new ExpressError(404, "Listing not found");
-  }
-  res.render("listings/edit.ejs", { listing });
-}));
-
-// UPDATE
-// UPDATE
-app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { runValidators: true });
-    req.flash("success", "Listing Updated!");
-    res.redirect(`/listings/${id}`);
-  } catch (err) {
-    if (err.name === "ValidationError") {
-      req.flash("error", err.message);
-      return res.redirect(`/listings/${req.params.id}/edit`);
-    }
-    throw err;
-  }
-}));
-
-// DELETE
-app.delete("/listings/:id", wrapAsync(async (req, res) => {
-  const { id } = req.params;
-  await Listing.findByIdAndDelete(id);
-  req.flash("success", "Listing Deleted!");
-  res.redirect("/listings");
-}));
-
-// ---------- 404 + Error Handlers (always last, in this order) ----------
-app.use((req, res, next) => {
-  next(new ExpressError(404, "Page not found"));
-});
-
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message = "Something went wrong!" } = err;
-  res.status(statusCode).render("error.ejs", { message });
-});
-
-// ---------- Start Server ----------
-app.listen(8080, () => {
-  console.log("Server is listening on port 8080");
-});
-// Signup form
+// ---------- Auth Routes ----------
 app.get("/signup", (req, res) => {
   res.render("users/signup.ejs");
 });
 
-// Register new user
 app.post("/signup", wrapAsync(async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
@@ -196,12 +106,11 @@ app.post("/signup", wrapAsync(async (req, res, next) => {
     res.redirect("/signup");
   }
 }));
-// Login form
+
 app.get("/login", (req, res) => {
   res.render("users/login.ejs");
 });
 
-// Authenticate user
 app.post(
   "/login",
   passport.authenticate("local", {
@@ -213,10 +122,87 @@ app.post(
     res.redirect("/listings");
   }
 );
+
 app.get("/logout", (req, res, next) => {
   req.logout((err) => {
     if (err) return next(err);
     req.flash("success", "Logged out successfully!");
     res.redirect("/listings");
   });
+});
+
+// ---------- Listing Routes ----------
+app.get("/listings", wrapAsync(async (req, res) => {
+  const allListings = await Listing.find({});
+  res.render("listings/index.ejs", { allListings });
+}));
+
+app.get("/listings/new", (req, res) => {
+  res.render("listings/new.ejs");
+});
+
+app.post("/listings", validateListing, wrapAsync(async (req, res) => {
+  try {
+    const newListing = new Listing(req.body.listing);
+    await newListing.save();
+    req.flash("success", "New Listing Created!");
+    res.redirect("/listings");
+  } catch (err) {
+    if (err.name === "ValidationError") {
+      req.flash("error", err.message);
+      return res.redirect("/listings/new");
+    }
+    throw err;
+  }
+}));
+
+app.get("/listings/:id", wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+  if (!listing) throw new ExpressError(404, "Listing not found");
+  res.render("listings/show.ejs", { listing });
+}));
+
+app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+  if (!listing) throw new ExpressError(404, "Listing not found");
+  res.render("listings/edit.ejs", { listing });
+}));
+
+app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { runValidators: true });
+    req.flash("success", "Listing Updated!");
+    res.redirect(`/listings/${id}`);
+  } catch (err) {
+    if (err.name === "ValidationError") {
+      req.flash("error", err.message);
+      return res.redirect(`/listings/${req.params.id}/edit`);
+    }
+    throw err;
+  }
+}));
+
+app.delete("/listings/:id", wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  await Listing.findByIdAndDelete(id);
+  req.flash("success", "Listing Deleted!");
+  res.redirect("/listings");
+}));
+
+// ---------- 404 + Error Handlers ----------
+app.use((req, res, next) => {
+  next(new ExpressError(404, "Page not found"));
+});
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message = "Something went wrong!" } = err;
+  res.status(statusCode).render("error.ejs", { message });
+});
+
+// ---------- Start Server ----------
+app.listen(8080, () => {
+  console.log("Server is listening on port 8080");
 });
