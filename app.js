@@ -78,6 +78,14 @@ app.get("/", (req, res) => {
   res.render("home.ejs");
 });
 
+const isLoggedIn = (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    req.flash("error", "You must be logged in to do that!");
+    return res.redirect("/login");
+  }
+  next();
+};
+
 app.get("/about", (req, res) => {
   res.render("about", {
     title: "About Us",
@@ -137,13 +145,14 @@ app.get("/listings", wrapAsync(async (req, res) => {
   res.render("listings/index.ejs", { allListings });
 }));
 
-app.get("/listings/new", (req, res) => {
+app.get("/listings/new", isLoggedIn, (req, res) => {
   res.render("listings/new.ejs");
 });
 
-app.post("/listings", validateListing, wrapAsync(async (req, res) => {
+app.post("/listings", isLoggedIn, validateListing, wrapAsync(async (req, res) => {
   try {
     const newListing = new Listing(req.body.listing);
+    newListing.owner = req.user._id;
     await newListing.save();
     req.flash("success", "New Listing Created!");
     res.redirect("/listings");
@@ -155,22 +164,24 @@ app.post("/listings", validateListing, wrapAsync(async (req, res) => {
     throw err;
   }
 }));
-
-app.get("/listings/:id", wrapAsync(async (req, res) => {
+const isOwner = async (req, res, next) => {
   const { id } = req.params;
   const listing = await Listing.findById(id);
-  if (!listing) throw new ExpressError(404, "Listing not found");
-  res.render("listings/show.ejs", { listing });
-}));
+  if (!listing.owner.equals(req.user._id)) {
+    req.flash("error", "You don't have permission to do that!");
+    return res.redirect(`/listings/${id}`);
+  }
+  next();
+};
 
-app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
+app.get("/listings/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
   const { id } = req.params;
   const listing = await Listing.findById(id);
   if (!listing) throw new ExpressError(404, "Listing not found");
   res.render("listings/edit.ejs", { listing });
 }));
 
-app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
+app.put("/listings/:id", isLoggedIn, validateListing, wrapAsync(async (req, res) => {
   try {
     const { id } = req.params;
     await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { runValidators: true });
@@ -185,7 +196,7 @@ app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
   }
 }));
 
-app.delete("/listings/:id", wrapAsync(async (req, res) => {
+app.delete("/listings/:id", isLoggedIn, wrapAsync(async (req, res) => {
   const { id } = req.params;
   await Listing.findByIdAndDelete(id);
   req.flash("success", "Listing Deleted!");

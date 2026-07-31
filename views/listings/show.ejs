@@ -1,8 +1,6 @@
-<% layout("layouts/boilerplate") %>
-<h1><%= listing.title %></h1>
-<p><%= listing.description %></p>
-<p>Price: ₹<%= listing.price %></p>
-<p><%= listing.location %>, <%= listing.country %></p>
-<a href="/listings/<%= listing._id %>/edit">Edit this listing</a>
-
-<a href="/listings">← Back to all listings</a>
+<% if (currentUser && listing.owner && currentUser._id.equals(listing.owner._id)) { %>
+  <a href="/listings/<%= listing._id %>/edit">Edit this listing</a>
+  <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+    <button type="submit">Delete this listing</button>
+  </form>
+<% } %>
