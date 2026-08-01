@@ -4,3 +4,34 @@
     <button type="submit">Delete this listing</button>
   </form>
 <% } %>
+<hr>
+<h3>Reviews</h3>
+
+<% if (currentUser) { %>
+  <form method="POST" action="/listings/<%= listing._id %>/reviews" novalidate class="needs-validation">
+    <label>Rating (1-5)</label>
+    <input type="number" name="review[rating]" min="1" max="5" required><br>
+
+    <label>Comment</label>
+    <input type="text" name="review[comment]" required><br>
+
+    <button type="submit">Submit Review</button>
+  </form>
+<% } else { %>
+  <p><a href="/login">Log in</a> to leave a review.</p>
+<% } %>
+
+<div class="review-list">
+  <% listing.reviews.forEach(review => { %>
+    <div class="review-card">
+      <p><strong><%= review.author ? review.author.username : "Unknown" %></strong> — Rating: <%= review.rating %>/5</p>
+      <p><%= review.comment %></p>
+
+      <% if (currentUser && review.author && currentUser._id.equals(review.author._id)) { %>
+        <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+          <button type="submit">Delete Review</button>
+        </form>
+      <% } %>
+    </div>
+  <% }) %>
+</div>

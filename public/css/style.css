@@ -109,3 +109,10 @@ h1 {
   color: #d33;
   margin-bottom: 1rem;
 }
+.review-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}

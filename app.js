@@ -14,6 +14,8 @@ const Listing = require("./models/listing");
 const ExpressError = require("./utils/ExpressError.js");
 const wrapAsync = require("./utils/wrapAsync.js");
 const { listingSchema } = require("./schema.js");
+const Review = require("./models/review.js");
+const { listingSchema, reviewSchema } = require("./schema.js");
 
 const validateListing = (req, res, next) => {
   const { error } = listingSchema.validate(req.body);
@@ -24,6 +26,14 @@ const validateListing = (req, res, next) => {
   next();
 };
 
+const validateReview = (req, res, next) => {
+  const { error } = reviewSchema.validate(req.body);
+  if (error) {
+    const errMsg = error.details.map((el) => el.message).join(", ");
+    throw new ExpressError(400, errMsg);
+  }
+  next();
+};
 // ---------- Middleware ----------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -195,12 +205,48 @@ app.put("/listings/:id", isLoggedIn, validateListing, wrapAsync(async (req, res)
     throw err;
   }
 }));
+app.get("/listings/:id", wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id)
+    .populate({
+      path: "reviews",
+      populate: { path: "author" },
+    })
+    .populate("owner");
+  if (!listing) throw new ExpressError(404, "Listing not found");
+  res.render("listings/show.ejs", { listing });
+}));
 
 app.delete("/listings/:id", isLoggedIn, wrapAsync(async (req, res) => {
   const { id } = req.params;
   await Listing.findByIdAndDelete(id);
   req.flash("success", "Listing Deleted!");
   res.redirect("/listings");
+}));
+// CREATE review
+app.post("/listings/:id/reviews", isLoggedIn, validateReview, wrapAsync(async (req, res) => {
+  const listing = await Listing.findById(req.params.id);
+  const newReview = new Review(req.body.review);
+  newReview.author = req.user._id;
+
+  listing.reviews.push(newReview);
+
+  await newReview.save();
+  await listing.save();
+
+  req.flash("success", "New Review Added!");
+  res.redirect(`/listings/${listing._id}`);
+}));
+
+// DELETE review
+app.delete("/listings/:id/reviews/:reviewId", isLoggedIn, wrapAsync(async (req, res) => {
+  const { id, reviewId } = req.params;
+
+  await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+  await Review.findByIdAndDelete(reviewId);
+
+  req.flash("success", "Review Deleted!");
+  res.redirect(`/listings/${id}`);
 }));
 
 // ---------- 404 + Error Handlers ----------
