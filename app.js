@@ -120,6 +120,7 @@ app.post("/signup", wrapAsync(async (req, res, next) => {
       res.redirect("/listings");
     });
   } catch (err) {
+    console.error("SIGNUP ERROR:", err);
     req.flash("error", err.message);
     res.redirect("/signup");
   }
@@ -248,6 +249,13 @@ app.delete("/listings/:id/reviews/:reviewId", isLoggedIn, wrapAsync(async (req, 
   req.flash("success", "Review Deleted!");
   res.redirect(`/listings/${id}`);
 }));
+app.use((err, req, res, next) => {
+  console.log("=== ERROR STACK START ===");
+  console.log(err.stack);
+  console.log("=== ERROR STACK END ===");
+  const { statusCode = 500, message = "Something went wrong!" } = err;
+  res.status(statusCode).render("error.ejs", { message });
+});
 
 // ---------- 404 + Error Handlers ----------
 app.use((req, res, next) => {
