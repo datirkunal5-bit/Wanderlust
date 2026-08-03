@@ -8,6 +8,7 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const cookieParser = require("cookie-parser");
 
 const User = require("./models/user.js");
 const ExpressError = require("./utils/ExpressError.js");
@@ -17,6 +18,7 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
 // ---------- Middleware ----------
+app.use(cookieParser("mysupersecretcode"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
@@ -63,7 +65,21 @@ main()
 async function main() {
   await mongoose.connect(MONGO_URL);
 }
+app.get("/cookie-test", (req, res) => {
+  res.cookie("greeting", "hello from server");
+  res.send("Cookie sent! Check your browser dev tools.");
+});
+app.get("/cookie-signed-test", (req, res) => {
+  res.cookie("signedGreeting", "secure hello", { signed: true });
+  res.send("Signed cookie sent!");
+});
 
+app.get("/cookie-read-test", (req, res) => {
+  res.send({
+    normalCookies: req.cookies,
+    signedCookies: req.signedCookies,
+  });
+});
 // ---------- Basic Routes ----------
 app.get("/", (req, res) => {
   res.render("home.ejs");
