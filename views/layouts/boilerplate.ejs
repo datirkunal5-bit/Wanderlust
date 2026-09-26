@@ -3,28 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wanderlust</title>
+  <title>Wanderlust · Holiday Homes & Vacation Rentals</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <!-- Header / Navigation Bar -->
   <%- include("../includes/navbar.ejs") %>
-  <% if (success && success.length > 0) { %>
-  <div class="flash flash-success">
-    <%= success %>
-  </div>
-<% } %>
 
-<% if (error && error.length > 0) { %>
-  <div class="flash flash-error">
-    <%= error %>
-  </div>
-<% } %>
+  <!-- Flash Alerts -->
+  <div class="flash-wrapper">
+    <% if (success && success.length > 0) { %>
+      <div class="alert alert-success" role="alert" id="flash-alert">
+        <div class="alert-content">
+          <i class="fa-solid fa-circle-check alert-icon"></i>
+          <span><%= success %></span>
+        </div>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    <% } %>
 
-  <main>
+    <% if (error && error.length > 0) { %>
+      <div class="alert alert-danger" role="alert" id="flash-alert">
+        <div class="alert-content">
+          <i class="fa-solid fa-circle-exclamation alert-icon"></i>
+          <span><%= error %></span>
+        </div>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Main Body Content -->
+  <main class="page-container">
     <%- body %>
   </main>
 
+  <!-- Footer -->
   <%- include("../includes/footer.ejs") %>
+
+  <!-- Custom Scripts -->
   <script src="/js/validation.js"></script>
 </body>
 </html>

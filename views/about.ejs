@@ -1,16 +1,78 @@
-
 <% layout("layouts/boilerplate") %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>About</title>
-</head>
-<body>
-    <h1>About Wanderlust</h1>
-    <h1><%= title %></h1>
-    <h2><%= name %></h2>
-    <h3><%= description %></h3>
-    <p>Welcome to the about page!</p>
-</body>
-</html>
+
+<div class="about-page-container">
+  <!-- Hero Section -->
+  <section class="about-hero">
+    <span class="about-badge"><i class="fa-solid fa-compass"></i> Our Story & Mission</span>
+    <h1>Redefining How the World Travels and Belongs Anywhere</h1>
+    <p>Wanderlust began with a simple belief: travel isn't just about visiting a place, it is about feeling at home wherever your wanderlust takes you.</p>
+  </section>
+
+  <!-- Key Statistics Grid -->
+  <section class="about-stats-grid">
+    <div class="stat-card">
+      <span class="stat-number">50,000+</span>
+      <span class="stat-title">Handpicked Stays</span>
+      <p class="stat-desc">Villas, chalets, castles, and eco-retreats worldwide.</p>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">120+</span>
+      <span class="stat-title">Countries Covered</span>
+      <p class="stat-desc">Connecting travelers across six continents seamlessly.</p>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">1.2M+</span>
+      <span class="stat-title">Happy Travelers</span>
+      <p class="stat-desc">Creating lifelong memories with friends and family.</p>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">4.92 ★</span>
+      <span class="stat-title">Average Host Rating</span>
+      <p class="stat-desc">Commitment to hospitality, cleanliness, and trust.</p>
+    </div>
+  </section>
+
+  <!-- Core Values -->
+  <section class="about-values-section">
+    <div class="text-center">
+      <h2>The Values Guiding Us</h2>
+      <p class="section-subtitle">Every feature and experience we build reflects these four fundamental principles.</p>
+    </div>
+
+    <div class="values-grid">
+      <div class="value-item">
+        <div class="value-icon"><i class="fa-solid fa-heart"></i></div>
+        <h3>Hospitality First</h3>
+        <p>We treat every guest and host as part of our global community, ensuring care and respect in every interaction.</p>
+      </div>
+
+      <div class="value-item">
+        <div class="value-icon"><i class="fa-solid fa-earth-americas"></i></div>
+        <h3>Authentic Exploration</h3>
+        <p>We champion local experiences, regional architecture, and sustainable community-led tourism.</p>
+      </div>
+
+      <div class="value-item">
+        <div class="value-icon"><i class="fa-solid fa-lock"></i></div>
+        <h3>Safety & Transparency</h3>
+        <p>Secure authentication, verified listings, transparent billing without hidden fees, and verified reviews.</p>
+      </div>
+
+      <div class="value-item">
+        <div class="value-icon"><i class="fa-solid fa-handshake"></i></div>
+        <h3>Empowering Hosts</h3>
+        <p>Providing independent property owners, artisans, and families the tools to build thriving hosting businesses.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="about-cta-section">
+    <h2>Ready to embark on your next adventure?</h2>
+    <p>Find your next getaway or list your space to earn with Wanderlust today.</p>
+    <div class="about-cta-buttons">
+      <a href="/listings" class="btn-primary"><i class="fa-solid fa-compass"></i> Explore Stays</a>
+      <a href="/listings/new" class="btn-secondary"><i class="fa-solid fa-house"></i> Host Your Home</a>
+    </div>
+  </section>
+</div>

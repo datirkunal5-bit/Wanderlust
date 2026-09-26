@@ -1,20 +1,139 @@
 <% layout("layouts/boilerplate") %>
-<h1>Edit Listing</h1>
-<form method="POST" action="/listings/<%= listing._id %>?_method=PUT">
-  <label>Title</label>
-  <input type="text" name="listing[title]" value="<%= listing.title %>"><br>
 
-  <label>Description</label>
-  <input type="text" name="listing[description]" value="<%= listing.description %>"><br>
+<div class="form-page-container">
+  <div class="form-card">
+    <div class="form-card-header">
+      <span class="form-icon-badge"><i class="fa-solid fa-pen-to-square"></i></span>
+      <h1>Edit Listing</h1>
+      <p>Update property information, pricing, or imagery for "<%= listing.title %>".</p>
+    </div>
 
-  <label>Price</label>
-  <input type="number" name="listing[price]" value="<%= listing.price %>"><br>
+    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation main-form">
+      <!-- Title -->
+      <div class="form-group">
+        <label for="listingTitle" class="form-label">Property Title <span class="required">*</span></label>
+        <input 
+          type="text" 
+          name="listing[title]" 
+          id="listingTitle" 
+          class="form-control" 
+          value="<%= listing.title %>" 
+          required 
+          minlength="4"
+        />
+        <div class="invalid-feedback">Please provide a valid title.</div>
+      </div>
 
-  <label>Location</label>
-  <input type="text" name="listing[location]" value="<%= listing.location %>"><br>
+      <!-- Category -->
+      <div class="form-group">
+        <label for="listingCategory" class="form-label">Category <span class="required">*</span></label>
+        <select name="listing[category]" id="listingCategory" class="form-select" required>
+          <option value="trending" <%= listing.category === 'trending' ? 'selected' : '' %>>🔥 Trending</option>
+          <option value="beach" <%= listing.category === 'beach' ? 'selected' : '' %>>🏖️ Beachfront</option>
+          <option value="mountains" <%= listing.category === 'mountains' ? 'selected' : '' %>>🏔️ Mountains</option>
+          <option value="iconic-cities" <%= listing.category === 'iconic-cities' ? 'selected' : '' %>>🏙️ Iconic Cities</option>
+          <option value="castles" <%= listing.category === 'castles' ? 'selected' : '' %>>🏰 Castles & Palaces</option>
+          <option value="pools" <%= listing.category === 'pools' ? 'selected' : '' %>>🏊 Amazing Pools</option>
+          <option value="camping" <%= listing.category === 'camping' ? 'selected' : '' %>>⛺ Camping & Glamping</option>
+          <option value="farms" <%= listing.category === 'farms' ? 'selected' : '' %>>🚜 Countryside & Farms</option>
+          <option value="arctic" <%= listing.category === 'arctic' ? 'selected' : '' %>>❄️ Arctic & Snow</option>
+          <option value="luxury" <%= listing.category === 'luxury' ? 'selected' : '' %>>💎 Luxury Stays</option>
+          <option value="rooms" <%= listing.category === 'rooms' ? 'selected' : '' %>>🛏️ Private Rooms</option>
+          <option value="boats" <%= listing.category === 'boats' ? 'selected' : '' %>>⛵ Boats & Houseboats</option>
+        </select>
+      </div>
 
-  <label>Country</label>
-  <input type="text" name="listing[country]" value="<%= listing.country %>"><br>
+      <!-- Description -->
+      <div class="form-group">
+        <label for="listingDescription" class="form-label">Description <span class="required">*</span></label>
+        <textarea 
+          name="listing[description]" 
+          id="listingDescription" 
+          rows="5" 
+          class="form-control" 
+          required
+        ><%= listing.description %></textarea>
+        <div class="invalid-feedback">Please provide a description.</div>
+      </div>
 
-  <button type="submit">Update Listing</button>
-</form>
+      <!-- Image URL with Live Preview -->
+      <div class="form-group">
+        <label for="listingImage" class="form-label">Cover Image URL</label>
+        <input 
+          type="url" 
+          name="listing[image]" 
+          id="listingImage" 
+          class="form-control" 
+          value="<%= listing.image %>"
+          oninput="updateImagePreview(this.value)"
+        />
+        <div class="form-hint">Paste a new image link to replace the current cover photo.</div>
+        <div class="image-preview-wrapper" id="previewContainer">
+          <p class="preview-label">Current / Updated Image Preview:</p>
+          <img 
+            id="imagePreview" 
+            src="<%= listing.image || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200' %>" 
+            alt="Preview" 
+            class="form-image-preview"
+            onerror="this.src='https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200';"
+          />
+        </div>
+      </div>
+
+      <!-- Price & Location in 2 Columns -->
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="listingPrice" class="form-label">Nightly Price (₹ INR) <span class="required">*</span></label>
+          <div class="input-prefix-wrapper">
+            <span class="input-prefix">₹</span>
+            <input 
+              type="number" 
+              name="listing[price]" 
+              id="listingPrice" 
+              class="form-control with-prefix" 
+              value="<%= listing.price %>" 
+              min="100" 
+              required
+            />
+          </div>
+          <div class="invalid-feedback">Please enter a valid price.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="listingLocation" class="form-label">City / Town <span class="required">*</span></label>
+          <input 
+            type="text" 
+            name="listing[location]" 
+            id="listingLocation" 
+            class="form-control" 
+            value="<%= listing.location %>" 
+            required
+          />
+          <div class="invalid-feedback">Please specify the location.</div>
+        </div>
+      </div>
+
+      <!-- Country -->
+      <div class="form-group">
+        <label for="listingCountry" class="form-label">Country <span class="required">*</span></label>
+        <input 
+          type="text" 
+          name="listing[country]" 
+          id="listingCountry" 
+          class="form-control" 
+          value="<%= listing.country %>" 
+          required
+        />
+        <div class="invalid-feedback">Please enter the country.</div>
+      </div>
+
+      <!-- Submit & Cancel Buttons -->
+      <div class="form-actions-row">
+        <a href="/listings/<%= listing._id %>" class="btn-cancel">Cancel</a>
+        <button type="submit" class="btn-primary btn-submit-form">
+          <i class="fa-solid fa-check"></i> Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

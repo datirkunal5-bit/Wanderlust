@@ -1,5 +1,132 @@
+<% layout("layouts/boilerplate") %>
 
-<% layout("layouts/boilerplate") %><h1>Welcome to Wanderlust</h1>
-<p>Find your next stay.</p>
-<a href="/listings">View all listings</a>
-<a href="/about">About us</a>
+<!-- Hero Banner Section -->
+<section class="home-hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <span class="hero-pill-badge">
+      <i class="fa-solid fa-sparkles"></i> Unforgettable Travel Experiences
+    </span>
+    <h1 class="hero-title">Find Stays That Feel Like Home Anywhere in the World.</h1>
+    <p class="hero-subtitle">
+      Discover dream villas, secluded chalets, infinity pools, and historic castles curated for unforgettable journeys.
+    </p>
+
+    <!-- Hero Search Widget -->
+    <div class="hero-search-card">
+      <form action="/listings" method="GET" class="hero-search-form">
+        <div class="search-field">
+          <label><i class="fa-solid fa-location-dot"></i> Where</label>
+          <input type="text" name="q" placeholder="Search destinations, cities, or villas..." />
+        </div>
+
+        <div class="search-field border-left">
+          <label><i class="fa-solid fa-icons"></i> Category</label>
+          <select name="category">
+            <option value="all">All Experiences</option>
+            <option value="trending">🔥 Trending</option>
+            <option value="beach">🏖️ Beachfront</option>
+            <option value="mountains">🏔️ Mountains</option>
+            <option value="iconic-cities">🏙️ Iconic Cities</option>
+            <option value="castles">🏰 Castles</option>
+            <option value="pools">🏊 Pools</option>
+            <option value="luxury">💎 Luxury</option>
+            <option value="camping">⛺ Camping</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-hero-search">
+          <i class="fa-solid fa-magnifying-glass"></i> Search Stays
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Trending Categories Quick Links -->
+<section class="section-container">
+  <div class="section-header-row">
+    <div>
+      <h2 class="section-title">Explore by Experience</h2>
+      <p class="section-subtitle">Pick a vibe and discover handpicked homes around the world</p>
+    </div>
+    <a href="/listings" class="link-view-all">Browse all listings <i class="fa-solid fa-arrow-right"></i></a>
+  </div>
+
+  <div class="categories-showcase-grid">
+    <a href="/listings?category=beach" class="cat-card">
+      <div class="cat-icon-wrap"><i class="fa-solid fa-umbrella-beach"></i></div>
+      <h3>Beachfront</h3>
+      <p>Sun, surf & sea breeze</p>
+    </a>
+    <a href="/listings?category=mountains" class="cat-card">
+      <div class="cat-icon-wrap"><i class="fa-solid fa-mountain"></i></div>
+      <h3>Mountains</h3>
+      <p>Snow peaks & pine chalets</p>
+    </a>
+    <a href="/listings?category=pools" class="cat-card">
+      <div class="cat-icon-wrap"><i class="fa-solid fa-person-swimming"></i></div>
+      <h3>Amazing Pools</h3>
+      <p>Infinity views & sun decks</p>
+    </a>
+    <a href="/listings?category=castles" class="cat-card">
+      <div class="cat-icon-wrap"><i class="fa-brands fa-fort-awesome"></i></div>
+      <h3>Castles</h3>
+      <p>Historic European estates</p>
+    </a>
+    <a href="/listings?category=iconic-cities" class="cat-card">
+      <div class="cat-icon-wrap"><i class="fa-solid fa-city"></i></div>
+      <h3>Iconic Cities</h3>
+      <p>Lofts & penthouses</p>
+    </a>
+    <a href="/listings?category=luxury" class="cat-card">
+      <div class="cat-icon-wrap"><i class="fa-solid fa-gem"></i></div>
+      <h3>Luxury</h3>
+      <p>Five-star exclusive retreats</p>
+    </a>
+  </div>
+</section>
+
+<!-- Why Choose Wanderlust Section -->
+<section class="features-section">
+  <div class="section-container">
+    <div class="text-center">
+      <h2 class="section-title">Why Choose Wanderlust</h2>
+      <p class="section-subtitle">We build authentic connections between passionate hosts and curious explorers.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-box">
+        <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>100% Verified Stays</h3>
+        <p>Every home, villa, and cottage is verified for comfort, safety standards, and accurate descriptions.</p>
+      </div>
+
+      <div class="feature-box">
+        <div class="feature-icon"><i class="fa-solid fa-tags"></i></div>
+        <h3>Transparent Pricing</h3>
+        <p>No unexpected hidden fees during checkout. Clear taxes and breakdown displayed upfront with one click.</p>
+      </div>
+
+      <div class="feature-box">
+        <div class="feature-icon"><i class="fa-solid fa-headset"></i></div>
+        <h3>24/7 Global Support</h3>
+        <p>Our dedicated travel experience team is always by your side from planning to check-out.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Host CTA Banner -->
+<section class="section-container">
+  <div class="host-cta-banner">
+    <div class="host-cta-text">
+      <h2>Got an extraordinary space?</h2>
+      <p>Earn passive income by sharing your vacation home, farm, or cabin with travelers from over 120 countries.</p>
+      <div class="host-cta-buttons">
+        <a href="/listings/new" class="btn-primary">Start Hosting Today</a>
+        <a href="/about" class="btn-secondary">Learn More</a>
+      </div>
+    </div>
+  </div>
+</section>

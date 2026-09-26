@@ -1,37 +1,313 @@
-<% if (currentUser && listing.owner && currentUser._id.equals(listing.owner._id)) { %>
-  <a href="/listings/<%= listing._id %>/edit">Edit this listing</a>
-  <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
-    <button type="submit">Delete this listing</button>
-  </form>
-<% } %>
-<hr>
-<h3>Reviews</h3>
+<% layout("layouts/boilerplate") %>
 
-<% if (currentUser) { %>
-  <form method="POST" action="/listings/<%= listing._id %>/reviews" novalidate class="needs-validation">
-    <label>Rating (1-5)</label>
-    <input type="number" name="review[rating]" min="1" max="5" required><br>
+<div class="show-container">
+  <!-- Breadcrumbs & Action Bar -->
+  <div class="show-nav-bar">
+    <nav class="breadcrumb-trail" aria-label="Breadcrumb">
+      <a href="/listings"><i class="fa-solid fa-arrow-left"></i> All Listings</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-curr"><%= listing.country %></span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-curr"><%= listing.location %></span>
+    </nav>
+    <div class="show-action-btns">
+      <button class="btn-subtle" onclick="navigator.clipboard.writeText(window.location.href); alert('Listing link copied to clipboard!');">
+        <i class="fa-solid fa-arrow-up-from-bracket"></i> Share
+      </button>
+      <button class="btn-subtle wishlist-btn-show" onclick="toggleWishlist(this, event)">
+        <i class="fa-regular fa-heart"></i> Save
+      </button>
+    </div>
+  </div>
 
-    <label>Comment</label>
-    <input type="text" name="review[comment]" required><br>
-
-    <button type="submit">Submit Review</button>
-  </form>
-<% } else { %>
-  <p><a href="/login">Log in</a> to leave a review.</p>
-<% } %>
-
-<div class="review-list">
-  <% listing.reviews.forEach(review => { %>
-    <div class="review-card">
-      <p><strong><%= review.author ? review.author.username : "Unknown" %></strong> — Rating: <%= review.rating %>/5</p>
-      <p><%= review.comment %></p>
-
-      <% if (currentUser && review.author && currentUser._id.equals(review.author._id)) { %>
-        <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
-          <button type="submit">Delete Review</button>
-        </form>
+  <!-- Listing Header -->
+  <header class="show-header">
+    <h1 class="show-title"><%= listing.title %></h1>
+    <div class="show-subtitle">
+      <div class="subtitle-left">
+        <span class="rating-badge"><i class="fa-solid fa-star"></i> 4.92</span>
+        <span class="dot">·</span>
+        <a href="#reviews-section" class="reviews-count-link">
+          <%= listing.reviews ? listing.reviews.length : 0 %> reviews
+        </a>
+        <span class="dot">·</span>
+        <span class="location-badge">
+          <i class="fa-solid fa-location-dot"></i> <%= listing.location %>, <%= listing.country %>
+        </span>
+      </div>
+      <% if (listing.category) { %>
+        <span class="category-pill-tag">
+          <i class="fa-solid fa-tag"></i> <%= listing.category.toUpperCase() %>
+        </span>
       <% } %>
     </div>
-  <% }) %>
+  </header>
+
+  <!-- Hero Photo Gallery -->
+  <div class="show-photo-gallery">
+    <div class="photo-main-frame">
+      <img 
+        src="<%= listing.image || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200' %>" 
+        alt="<%= listing.title %>"
+        class="show-cover-image"
+        onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200';"
+      />
+    </div>
+  </div>
+
+  <!-- 2-Column Content Layout -->
+  <div class="show-main-grid">
+    <!-- Left Column: Details, Description, Amenities -->
+    <div class="show-details-col">
+      <!-- Host Card -->
+      <div class="host-profile-card">
+        <div class="host-avatar">
+          <%= listing.owner && listing.owner.username ? listing.owner.username.charAt(0).toUpperCase() : 'W' %>
+        </div>
+        <div class="host-info">
+          <h2>Entire home hosted by <%= listing.owner ? listing.owner.username : 'Wanderlust Host' %></h2>
+          <p>Superhost · 3 years hosting · 100% response rate</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Highlights -->
+      <div class="property-highlights">
+        <div class="highlight-item">
+          <i class="fa-solid fa-medal highlight-icon"></i>
+          <div>
+            <strong>Superhost Experience</strong>
+            <p>Superhosts are experienced, highly rated hosts committed to providing great stays.</p>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <i class="fa-solid fa-key highlight-icon"></i>
+          <div>
+            <strong>Self Check-In</strong>
+            <p>Check yourself in easily with the secure digital smart keypad.</p>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <i class="fa-solid fa-calendar-check highlight-icon"></i>
+          <div>
+            <strong>Free Cancellation</strong>
+            <p>Full refund available up to 48 hours before your planned arrival.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Description -->
+      <div class="property-description">
+        <h3>About this space</h3>
+        <p><%= listing.description %></p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Amenities Section -->
+      <div class="property-amenities">
+        <h3>What this place offers</h3>
+        <div class="amenities-grid">
+          <div class="amenity-item"><i class="fa-solid fa-wifi"></i> Fast High-Speed Wi-Fi</div>
+          <div class="amenity-item"><i class="fa-solid fa-person-swimming"></i> Private Swimming Pool</div>
+          <div class="amenity-item"><i class="fa-solid fa-kitchen-set"></i> Fully Equipped Kitchen</div>
+          <div class="amenity-item"><i class="fa-solid fa-square-parking"></i> Free On-Premises Parking</div>
+          <div class="amenity-item"><i class="fa-solid fa-snowflake"></i> Central Air Conditioning</div>
+          <div class="amenity-item"><i class="fa-solid fa-laptop"></i> Dedicated Workspace</div>
+          <div class="amenity-item"><i class="fa-solid fa-shield-halved"></i> Exterior Security Cameras</div>
+          <div class="amenity-item"><i class="fa-solid fa-tv"></i> 65" 4K Smart TV with Netflix</div>
+        </div>
+      </div>
+
+      <!-- Owner Actions (Edit & Delete) -->
+      <% if (currentUser && listing.owner && currentUser._id.equals(listing.owner._id)) { %>
+        <div class="divider"></div>
+        <div class="owner-controls-card">
+          <h4>Host Management Controls</h4>
+          <p>You are the owner of this listing. You can update listing details or remove it anytime.</p>
+          <div class="owner-actions-row">
+            <a href="/listings/<%= listing._id %>/edit" class="btn-owner-edit">
+              <i class="fa-solid fa-pen-to-square"></i> Edit Listing
+            </a>
+            <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" onsubmit="return confirm('Are you sure you want to permanently delete this listing?');">
+              <button type="submit" class="btn-owner-delete">
+                <i class="fa-solid fa-trash-can"></i> Delete Listing
+              </button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Right Column: Sticky Booking / Price Summary Card -->
+    <div class="show-booking-col">
+      <div class="booking-card-sticky">
+        <div class="booking-price-header">
+          <div>
+            <span class="booking-price-val">₹<%= Number(listing.price).toLocaleString("en-IN") %></span>
+            <span class="booking-price-unit">/ night</span>
+          </div>
+          <span class="booking-rating">
+            <i class="fa-solid fa-star"></i> 4.92 · <u><%= listing.reviews ? listing.reviews.length : 0 %> reviews</u>
+          </span>
+        </div>
+
+        <div class="booking-picker-box">
+          <div class="picker-row">
+            <div class="picker-cell">
+              <label>CHECK-IN</label>
+              <input type="date" value="<%= new Date().toISOString().split('T')[0] %>">
+            </div>
+            <div class="picker-cell border-left">
+              <label>CHECK-OUT</label>
+              <input type="date" value="<%= new Date(Date.now() + 3*24*60*60*1000).toISOString().split('T')[0] %>">
+            </div>
+          </div>
+          <div class="picker-row border-top">
+            <div class="picker-cell full-width">
+              <label>GUESTS</label>
+              <select>
+                <option>1 guest</option>
+                <option selected>2 guests</option>
+                <option>3 guests</option>
+                <option>4+ guests</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-reserve" onclick="alert('Demo reservation! Wanderlust booking confirmed for <%= listing.title %>.')">
+          Reserve Now
+        </button>
+        <p class="reserve-note">You won't be charged yet</p>
+
+        <div class="pricing-breakdown">
+          <div class="breakdown-row">
+            <span>₹<%= Number(listing.price).toLocaleString("en-IN") %> × 3 nights</span>
+            <span>₹<%= (listing.price * 3).toLocaleString("en-IN") %></span>
+          </div>
+          <div class="breakdown-row">
+            <span>Cleaning fee</span>
+            <span>₹1,200</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Wanderlust service fee</span>
+            <span>₹2,400</span>
+          </div>
+          <div class="breakdown-row">
+            <span>GST (18%)</span>
+            <span>₹<%= Math.round((listing.price * 3 + 3600) * 0.18).toLocaleString("en-IN") %></span>
+          </div>
+          <div class="breakdown-total">
+            <span>Total before taxes</span>
+            <strong>₹<%= Math.round((listing.price * 3 + 3600) * 1.18).toLocaleString("en-IN") %></strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <div class="divider section-divider"></div>
+  <section class="reviews-section" id="reviews-section">
+    <div class="reviews-section-header">
+      <h2>
+        <i class="fa-solid fa-star star-primary"></i> 4.92 · <%= listing.reviews ? listing.reviews.length : 0 %> Reviews
+      </h2>
+      <p>Verified reviews from genuine travelers who booked this stay</p>
+    </div>
+
+    <!-- Add Review Form -->
+    <div class="add-review-box">
+      <% if (currentUser) { %>
+        <h3>Leave a Review</h3>
+        <form method="POST" action="/listings/<%= listing._id %>/reviews" novalidate class="needs-validation review-form">
+          <div class="form-group">
+            <label class="form-label">Rating</label>
+            <div class="star-rating-select">
+              <input type="radio" id="star5" name="review[rating]" value="5" checked /><label for="star5" title="5 stars"><i class="fa-solid fa-star"></i></label>
+              <input type="radio" id="star4" name="review[rating]" value="4" /><label for="star4" title="4 stars"><i class="fa-solid fa-star"></i></label>
+              <input type="radio" id="star3" name="review[rating]" value="3" /><label for="star3" title="3 stars"><i class="fa-solid fa-star"></i></label>
+              <input type="radio" id="star2" name="review[rating]" value="2" /><label for="star2" title="2 stars"><i class="fa-solid fa-star"></i></label>
+              <input type="radio" id="star1" name="review[rating]" value="1" /><label for="star1" title="1 star"><i class="fa-solid fa-star"></i></label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reviewComment" class="form-label">Your Experience</label>
+            <textarea 
+              name="review[comment]" 
+              id="reviewComment" 
+              rows="4" 
+              class="form-control" 
+              placeholder="Tell other travelers about your stay, cleanliness, hospitality, and surrounding highlights..." 
+              required
+            ></textarea>
+            <div class="invalid-feedback">Please share a few words about your experience before submitting.</div>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> Submit Review
+          </button>
+        </form>
+      <% } else { %>
+        <div class="review-login-prompt">
+          <i class="fa-solid fa-circle-user prompt-icon"></i>
+          <div>
+            <h4>Have you stayed here?</h4>
+            <p>Log in or sign up to leave a review and help the travel community.</p>
+          </div>
+          <a href="/login" class="btn-outline">Log In to Review</a>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Reviews Grid -->
+    <% if (listing.reviews && listing.reviews.length > 0) { %>
+      <div class="reviews-grid">
+        <% listing.reviews.forEach(review => { %>
+          <div class="review-card">
+            <div class="review-card-header">
+              <div class="reviewer-avatar">
+                <%= review.author && review.author.username ? review.author.username.charAt(0).toUpperCase() : 'G' %>
+              </div>
+              <div class="reviewer-meta">
+                <h4><%= review.author ? review.author.username : 'Wanderer' %></h4>
+                <div class="review-date-stars">
+                  <span class="review-stars">
+                    <% for (let i = 1; i <= 5; i++) { %>
+                      <i class="fa-solid fa-star <%= i <= review.rating ? 'star-filled' : 'star-muted' %>"></i>
+                    <% } %>
+                  </span>
+                  <span class="review-date">
+                    <%= review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Recently' %>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <p class="review-comment-text"><%= review.comment %></p>
+
+            <% if (currentUser && review.author && currentUser._id.equals(review.author._id)) { %>
+              <div class="review-footer">
+                <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" onsubmit="return confirm('Delete your review?');">
+                  <button type="submit" class="btn-delete-review">
+                    <i class="fa-solid fa-trash-can"></i> Delete
+                  </button>
+                </form>
+              </div>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="no-reviews-box">
+        <i class="fa-regular fa-comment-dots"></i>
+        <p>No reviews yet. Be the first adventurer to share your story!</p>
+      </div>
+    <% } %>
+  </section>
 </div>

@@ -1,15 +1,159 @@
 <% layout("layouts/boilerplate") %>
-<h1>All Listings</h1>
-<a href="/listings/new" class="btn-new">+ Create New Listing</a>
 
-<div class="listing-grid">
-  <% allListings.forEach(listing => { %>
-    <div class="listing-card">
-      <a href="/listings/<%= listing._id %>">
-        <h3><%= listing.title %></h3>
-        <p class="location"><%= listing.location %>, <%= listing.country %></p>
-        <p class="price">₹<%= listing.price %> <span>/ night</span></p>
-      </a>
+<!-- Category Filter Bar & Tax Toggle Container -->
+<div class="filters-container">
+  <div class="categories-scroll-wrapper">
+    <a href="/listings?category=all<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory === 'undefined' || activeCategory === 'all') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-compass"></i>
+      <span>All</span>
+    </a>
+
+    <a href="/listings?category=trending<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'trending') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-fire"></i>
+      <span>Trending</span>
+    </a>
+
+    <a href="/listings?category=beach<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'beach') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-umbrella-beach"></i>
+      <span>Beach</span>
+    </a>
+
+    <a href="/listings?category=mountains<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'mountains') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-mountain"></i>
+      <span>Mountains</span>
+    </a>
+
+    <a href="/listings?category=iconic-cities<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'iconic-cities') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-city"></i>
+      <span>Iconic Cities</span>
+    </a>
+
+    <a href="/listings?category=castles<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'castles') ? 'active-filter' : '' %>">
+      <i class="fa-brands fa-fort-awesome"></i>
+      <span>Castles</span>
+    </a>
+
+    <a href="/listings?category=pools<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'pools') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-person-swimming"></i>
+      <span>Amazing Pools</span>
+    </a>
+
+    <a href="/listings?category=camping<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'camping') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-campground"></i>
+      <span>Camping</span>
+    </a>
+
+    <a href="/listings?category=farms<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'farms') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-wheat-awn"></i>
+      <span>Farms</span>
+    </a>
+
+    <a href="/listings?category=arctic<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'arctic') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-snowflake"></i>
+      <span>Arctic</span>
+    </a>
+
+    <a href="/listings?category=luxury<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'luxury') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-gem"></i>
+      <span>Luxury</span>
+    </a>
+
+    <a href="/listings?category=rooms<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'rooms') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-bed"></i>
+      <span>Rooms</span>
+    </a>
+
+    <a href="/listings?category=boats<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" 
+       class="filter-pill <%= (typeof activeCategory !== 'undefined' && activeCategory === 'boats') ? 'active-filter' : '' %>">
+      <i class="fa-solid fa-sailboat"></i>
+      <span>Boats</span>
+    </a>
+  </div>
+
+  <!-- Tax Toggle Box -->
+  <div class="tax-toggle-wrapper">
+    <div class="tax-toggle-box">
+      <label class="toggle-switch">
+        <input type="checkbox" id="taxSwitch">
+        <span class="slider round"></span>
+      </label>
+      <span class="tax-label">Display total after taxes</span>
     </div>
-  <% }) %>
+  </div>
 </div>
+
+<!-- Active Search / Filter Feedback -->
+<% if (typeof searchQuery !== 'undefined' && searchQuery.trim() !== '') { %>
+  <div class="search-result-header">
+    <h2>Search results for "<strong><%= searchQuery %></strong>"</h2>
+    <a href="/listings" class="btn-clear-search"><i class="fa-solid fa-xmark"></i> Clear Search</a>
+  </div>
+<% } %>
+
+<!-- Listings Grid -->
+<% if (allListings && allListings.length > 0) { %>
+  <div class="listings-grid">
+    <% allListings.forEach(listing => { %>
+      <div class="listing-card">
+        <div class="listing-image-container">
+          <a href="/listings/<%= listing._id %>" class="card-img-link">
+            <img 
+              src="<%= listing.image || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200' %>" 
+              alt="<%= listing.title %>" 
+              class="listing-cover-img"
+              loading="lazy"
+              onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200';"
+            />
+          </a>
+          <button class="wishlist-btn" type="button" aria-label="Add to wishlist" onclick="toggleWishlist(this, event)">
+            <i class="fa-regular fa-heart"></i>
+          </button>
+          <% if (listing.category) { %>
+            <span class="category-badge"><%= listing.category %></span>
+          <% } %>
+        </div>
+
+        <a href="/listings/<%= listing._id %>" class="listing-details-link">
+          <div class="listing-header-row">
+            <h3 class="listing-card-title"><%= listing.title %></h3>
+            <span class="listing-card-rating">
+              <i class="fa-solid fa-star"></i> 4.9
+            </span>
+          </div>
+          <p class="listing-card-location">
+            <i class="fa-solid fa-location-dot"></i> <%= listing.location %>, <%= listing.country %>
+          </p>
+          <div class="listing-card-pricing">
+            <span class="base-price">₹<%= Number(listing.price).toLocaleString("en-IN") %></span>
+            <span class="price-period">/ night</span>
+            <span class="tax-info">&nbsp;·&nbsp; ₹<%= Math.round(Number(listing.price) * 1.18).toLocaleString("en-IN") %> incl. taxes</span>
+          </div>
+        </a>
+      </div>
+    <% }) %>
+  </div>
+<% } else { %>
+  <!-- Empty State -->
+  <div class="empty-state-card">
+    <div class="empty-icon-wrap">
+      <i class="fa-solid fa-map-location-dot"></i>
+    </div>
+    <h2>No stays found</h2>
+    <p>We couldn't find any listings matching your current search or category filter. Try clearing filters or searching for another destination.</p>
+    <a href="/listings" class="btn-primary">
+      <i class="fa-solid fa-rotate-left"></i> Reset All Filters
+    </a>
+  </div>
+<% } %>

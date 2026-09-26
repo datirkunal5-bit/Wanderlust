@@ -6,19 +6,38 @@ const listingSchema = new Schema({
   title: {
     type: String,
     required: true,
+    trim: true,
   },
-  description: String,
+  description: {
+    type: String,
+    trim: true,
+  },
   image: {
     type: String,
     default: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200",
-    set: (v) => (v === "" ? "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200" : v),
+    set: (v) => (!v || v.trim() === "" ? "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200" : v),
   },
   price: {
     type: Number,
     min: 0,
+    required: true,
   },
-  location: String,
-  country: String,
+  location: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  country: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  category: {
+    type: String,
+    default: "trending",
+    lowercase: true,
+    trim: true,
+  },
   owner: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -29,10 +48,15 @@ const listingSchema = new Schema({
       ref: "Review",
     },
   ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
+// Cascade delete reviews when a listing is deleted
 listingSchema.post("findOneAndDelete", async (listing) => {
-  if (listing) {
+  if (listing && listing.reviews && listing.reviews.length > 0) {
     await Review.deleteMany({ _id: { $in: listing.reviews } });
   }
 });

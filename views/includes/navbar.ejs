@@ -1,13 +1,89 @@
-<nav>
-  <a href="/">Wanderlust</a>
-  <a href="/listings">Explore</a>
-  <a href="/listings/new">Add Listing</a>
-  <a href="/about">About</a>
+<header class="site-header">
+  <div class="nav-container">
+    <!-- Brand Logo -->
+    <a href="/" class="brand-link" aria-label="Wanderlust Home">
+      <i class="fa-solid fa-compass brand-icon"></i>
+      <span class="brand-title">wanderlust</span>
+    </a>
 
-  <% if (currentUser) { %>
-    <a href="/logout">Logout</a>
-  <% } else { %>
-    <a href="/login">Login</a>
-    <a href="/signup">Sign Up</a>
-  <% } %>
-</nav>
+    <!-- Global Search Bar -->
+    <div class="nav-search-bar">
+      <form action="/listings" method="GET" class="search-form">
+        <input 
+          type="text" 
+          name="q" 
+          value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" 
+          placeholder="Search destinations, villas, cities..." 
+          class="search-input"
+          aria-label="Search listings"
+        />
+        <% if (typeof activeCategory !== 'undefined' && activeCategory !== 'all') { %>
+          <input type="hidden" name="category" value="<%= activeCategory %>">
+        <% } %>
+        <button type="submit" class="search-btn" aria-label="Submit Search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- Navigation Right Menu -->
+    <div class="nav-actions">
+      <a href="/listings" class="nav-link-subtle">
+        <i class="fa-solid fa-earth-americas"></i> Explore
+      </a>
+
+      <a href="/listings/new" class="nav-link-host">
+        Wanderlust your home
+      </a>
+
+      <!-- User Menu Dropdown -->
+      <div class="user-menu-wrapper" id="userMenuWrapper">
+        <button class="user-menu-btn" id="userMenuBtn" aria-expanded="false" aria-label="User navigation menu">
+          <i class="fa-solid fa-bars menu-bars-icon"></i>
+          <% if (currentUser) { %>
+            <div class="user-avatar-badge"><%= currentUser.username.charAt(0).toUpperCase() %></div>
+          <% } else { %>
+            <i class="fa-solid fa-circle-user user-icon-default"></i>
+          <% } %>
+        </button>
+
+        <div class="user-dropdown-menu" id="userDropdown">
+          <% if (currentUser) { %>
+            <div class="user-greeting">
+              <span class="user-greeting-label">Signed in as</span>
+              <span class="user-greeting-name"><%= currentUser.username %></span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="/listings/new" class="dropdown-item">
+              <i class="fa-solid fa-plus-circle"></i> Create a Listing
+            </a>
+            <a href="/listings" class="dropdown-item">
+              <i class="fa-solid fa-compass"></i> Explore All Stays
+            </a>
+            <a href="/about" class="dropdown-item">
+              <i class="fa-solid fa-circle-info"></i> About Wanderlust
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="/logout" class="dropdown-item logout-link">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+            </a>
+          <% } else { %>
+            <a href="/signup" class="dropdown-item signup-link">
+              <strong>Sign Up</strong>
+            </a>
+            <a href="/login" class="dropdown-item">
+              Log In
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="/listings/new" class="dropdown-item">
+              Host your home
+            </a>
+            <a href="/about" class="dropdown-item">
+              About Wanderlust
+            </a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

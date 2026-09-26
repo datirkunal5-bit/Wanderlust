@@ -1,7 +1,20 @@
-
 <% layout("layouts/boilerplate") %>
-<div class="error-page">
-  <h1>Oops! Something went wrong</h1>
-  <p><%= message %></p>
-  <a href="/listings">← Back to listings</a>
+
+<div class="error-page-wrapper">
+  <div class="error-card">
+    <div class="error-code-badge"><%= typeof statusCode !== 'undefined' ? statusCode : 404 %></div>
+    <div class="error-icon-box">
+      <i class="fa-solid fa-compass-drafting"></i>
+    </div>
+    <h1>Lost in Exploration?</h1>
+    <p class="error-message-text"><%= typeof message !== 'undefined' ? message : "We couldn't find the page you were looking for." %></p>
+    <div class="error-actions">
+      <a href="/listings" class="btn-primary">
+        <i class="fa-solid fa-compass"></i> Explore Stays
+      </a>
+      <a href="/" class="btn-secondary">
+        <i class="fa-solid fa-house"></i> Return Home
+      </a>
+    </div>
+  </div>
 </div>

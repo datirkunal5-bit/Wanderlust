@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -20,15 +21,34 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
-// ---------- Middleware ----------
-app.use(cookieParser(process.env.SECRET));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
-app.use(express.static(path.join(__dirname, "public")));
+// ---------- Configuration ----------
+const MONGO_URL = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/wanderlust";
+const SECRET = process.env.SECRET || "wanderlustsupersecretkey2026";
+const PORT = process.env.PORT || 8080;
 
+// ---------- MongoDB Connection ----------
+async function main() {
+  await mongoose.connect(MONGO_URL);
+}
+
+main()
+  .then(() => console.log("✓ Connected to MongoDB database successfully"))
+  .catch((err) => console.error("✗ MongoDB connection error:", err));
+
+// ---------- View Engine & Static Files ----------
+app.engine("ejs", ejsMate);
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(methodOverride("_method"));
+app.use(cookieParser(SECRET));
+
+// ---------- Session & Flash ----------
 const sessionOptions = {
-  secret: process.env.SECRET,
+  secret: SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -41,58 +61,33 @@ const sessionOptions = {
 app.use(session(sessionOptions));
 app.use(flash());
 
+// ---------- Passport Authentication ----------
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+// ---------- Global Locals Middleware ----------
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currentUser = req.user;
+  res.locals.searchQuery = req.query.q || "";
+  res.locals.activeCategory = req.query.category || "all";
   next();
 });
 
-// ---------- View Engine ----------
-app.set("view engine", "ejs");
-app.engine("ejs", ejsMate);
-const MONGO_URL = process.env.ATLASDB_URL;
-// ---------- MongoDB Connection ----------
-//const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
-
-main()
-  .then(() => console.log("Connected to DB"))
-  .catch((err) => console.log(err));
-
-async function main() {
-  await mongoose.connect(MONGO_URL);
-}
-app.get("/cookie-test", (req, res) => {
-  res.cookie("greeting", "hello from server");
-  res.send("Cookie sent! Check your browser dev tools.");
-});
-app.get("/cookie-signed-test", (req, res) => {
-  res.cookie("signedGreeting", "secure hello", { signed: true });
-  res.send("Signed cookie sent!");
-});
-
-app.get("/cookie-read-test", (req, res) => {
-  res.send({
-    normalCookies: req.cookies,
-    signedCookies: req.signedCookies,
-  });
-});
 // ---------- Basic Routes ----------
 app.get("/", (req, res) => {
   res.render("home.ejs");
 });
 
 app.get("/about", (req, res) => {
-  res.render("about", {
-    title: "About Us",
+  res.render("about.ejs", {
+    title: "About Wanderlust",
     name: "Wanderlust",
-    description: "We are a travel company dedicated to providing the best travel experiences.",
+    description: "Discover handcrafted stays, unique experiences, and unforgettable journeys around the world.",
   });
 });
 
@@ -101,17 +96,17 @@ app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
-// ---------- 404 + Error Handlers ----------
+// ---------- 404 & Error Handlers ----------
 app.use((req, res, next) => {
-  next(new ExpressError(404, "Page not found"));
+  next(new ExpressError(404, "Page Not Found"));
 });
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message = "Something went wrong!" } = err;
-  res.status(statusCode).render("error.ejs", { message });
+  res.status(statusCode).render("error.ejs", { statusCode, message });
 });
 
 // ---------- Start Server ----------
-app.listen(8080, () => {
-  console.log("Server is listening on port 8080");
+app.listen(PORT, () => {
+  console.log(`✓ Wanderlust server running at http://localhost:${PORT}`);
 });
